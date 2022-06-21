@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Text, View, StyleSheet, Button, Image, TextInput, ScrollView, TouchableOpacity, PermissionsAndroid } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { Audio } from 'expo-av';
-// import defaultAppSettings from './defaults.js';
+import { SettingsContext } from '../App';
 // import * as FileSystem from 'expo-file-system';
 var RNFS = require('react-native-fs');
 
 // import MaskedView from '@react-native-masked-view/masked-view';
 
-const ScanCoolDown = 2000; // in ms
-const ExportFilesPath = "/admin"
-
-
 export default function InventoryScreen(props) {
+  const Settings  = useContext(SettingsContext);
 
   const { navigation } = props;
   const [store, setStore] = React.useState("1")
@@ -24,7 +21,7 @@ export default function InventoryScreen(props) {
       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
         return true;
       } else {
-        console.log("Camera permission denied");
+        console.log("Storage permission denied");
         return false;
       }
     } catch (err) {
@@ -33,10 +30,21 @@ export default function InventoryScreen(props) {
     }
   }
   askStoragePermission();
-  
+  async function GetFile(){
+
+    // make sure file directory exists
+    const dir = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/"
+    console.log(dir);
+    const exists = await RNFS.exists(dir);  // check if file exists
+
+    if (!exists) {
+      await RNFS.mkdir(dir);
+    }
+  }
   async function LoadFromFile (fileName= "store1.txt") {
     try{ 
-      const FilePath = RNFS.ExternalStorageDirectoryPath + ExportFilesPath + "/" + fileName;
+      await GetFile()
+      const FilePath = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/" + fileName;
       const file = await RNFS.readFile(FilePath, 'utf8');
       setItems( JSON.parse(file) )
       console.log("Loaded from file: " + fileName)
@@ -48,12 +56,13 @@ export default function InventoryScreen(props) {
 
   useEffect(() => {
     LoadFromFile("store1.txt");
+    console.log(Settings)
   }, [])
   async function saveToFile (){
-      
+      await GetFile()
       const Filename = "store" + store + ".txt";
       const FileContent = JSON.stringify( items );
-      const FilePath = RNFS.ExternalStorageDirectoryPath + ExportFilesPath + "/" + Filename;
+      const FilePath = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/" + Filename;
       RNFS.writeFile(FilePath, FileContent, 'utf8')
       .then((success) => {
         alert("Saved Successfully  :) ")
@@ -106,7 +115,7 @@ export default function InventoryScreen(props) {
     // alert(`Bar code with type ${type} and data ${data} has been scanned!`);
     setTimeout(() => {
       setScanned(false)
-    }, ScanCoolDown)
+    }, Settings.ScanCoolDown)
   };
 
   //------------------------------------------------------------
