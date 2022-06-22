@@ -23,7 +23,7 @@ export default function LoginScreen ( props ){
             <View style={{flex:1, width:"100%", padding:20, flexDirection:"column"}}>
                 <TextField label="Username or Email" style={{marginBottom:30}} value={usernameValue} onChange={setusernameValue}/>
                 <TextField label="Password" style={{marginBottom:10}} value={passwordValue} onChange={setpasswordValue}/>
-                <CheckBoxE label="Remember me ?" style={{marginBottom:30}}/>
+                <CheckBoxE label="Remember me ?" style={{marginBottom:30}} value={checkBoxValue} onChange={setCheckBoxValue}/>
                 <ActionButton label="Login" onPress={LoginPress} />
             </View>
         </View>
