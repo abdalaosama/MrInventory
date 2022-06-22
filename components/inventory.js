@@ -212,9 +212,7 @@ export default function InventoryScreen(props) {
                 
           </ScrollView>
           </View>
-
         </View>
-        
       </View>
 
       {/* {scanned && <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />} */}

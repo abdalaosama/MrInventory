@@ -24,7 +24,7 @@ export default function App() {
   return (
     <SettingsContext.Provider value={defaultAppSettings}>
       <NavigationContainer>
-        <Drawer.Navigator initialRouteName="login" screenOptions={{headerShown: false}}>
+        <Drawer.Navigator initialRouteName="inventory" screenOptions={{headerShown: false}}>
           <Drawer.Screen name="inventory" component={InventoryScreen} />
           <Drawer.Screen name="settings" component={SettingsScreen} />
           <Drawer.Screen name="login" component={LoginScreen} />
