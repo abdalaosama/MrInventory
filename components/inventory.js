@@ -3,6 +3,7 @@ import { Text, View, StyleSheet, Button, Image, TextInput, ScrollView, Touchable
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { Audio } from 'expo-av';
 import { SettingsContext } from '../App';
+import { tsvParse } from 'd3-dsv';
 // import * as FileSystem from 'expo-file-system';
 var RNFS = require('react-native-fs');
 
@@ -10,7 +11,7 @@ var RNFS = require('react-native-fs');
 
 export default function InventoryScreen(props) {
   const Settings  = useContext(SettingsContext);
-
+  const [itemTable, setitemTable] = React.useState( [] );
   const { navigation } = props;
   const [store, setStore] = React.useState("1")
   
@@ -46,26 +47,28 @@ export default function InventoryScreen(props) {
       await GetFile()
       const FilePath = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/" + fileName;
       const file = await RNFS.readFile(FilePath, 'utf8');
+    }catch(e){
+      console.log(e)
+      // alert("Error loading file")
+    }
+    try{
       setItems( JSON.parse(file) )
-      console.log("Loaded from file: " + fileName)
+      console.log("Loaded from file: " + fileName)  
     }catch(err){
       console.log(err)
-      alert("Error loading file")
+      // alert("Error loading file")
     }
+    
   }
 
-  useEffect(() => {
-    LoadFromFile("store1.txt");
-    console.log(Settings)
-  }, [])
   async function saveToFile (){
-      await GetFile()
-      const Filename = "store" + store + ".txt";
-      const FileContent = JSON.stringify( items );
-      const FilePath = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/" + Filename;
-      RNFS.writeFile(FilePath, FileContent, 'utf8')
-      .then((success) => {
-        alert("Saved Successfully  :) ")
+    await GetFile()
+    const Filename = "store" + store + ".txt";
+    const FileContent = JSON.stringify( items );
+    const FilePath = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/" + Filename;
+    RNFS.writeFile(FilePath, FileContent, 'utf8')
+    .then((success) => {
+      alert("Saved Successfully  :) ")
         console.log('FILE WRITTEN!');
       })
       .catch((err) => {
@@ -73,11 +76,37 @@ export default function InventoryScreen(props) {
         alert("Error saving to file")
       });
   }
+  
 
+  async function LoadItemsTable() {
+    try{ 
+      await GetFile()
+      const FilePath = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/items.txt";
+      const file = await RNFS.readFile(FilePath, 'utf8');
+      const parsed = tsvParse("barcode\tname\n"+file) ;
+      setitemTable(parsed)
+
+      console.log("Loaded the items from file ")
+    }catch(err){
+      console.log(err)
+      alert("Error loading items from file")
+    }
+  }
+
+
+  useEffect(() => {
+
+  (async () => {
+    await LoadItemsTable()
+    LoadFromFile("store1.txt");
+    console.log(Settings)
+    console.log("Items in file: " + itemTable.length)
+
+  })();
+  }, [])
+  
   // sounds
   const [sound, setSound] = React.useState();
-
-
   async function playSound() {
     console.log('Loading Sound');
     const { sound } = await Audio.Sound.createAsync(
@@ -128,26 +157,37 @@ export default function InventoryScreen(props) {
 
   function addItem(lItemCode, lqty ){
     console.log("Item Added: " + lItemCode + " Qty: " + lqty)
+    setQty("1")
+    setitemCode("")
     playSound();
 
-    if(lqty < 0 || isNaN(lqty)) return; 
+    if(lqty == 0 || isNaN(lqty)) return; 
     if(!lItemCode || lItemCode.length <= 0) return; 
 
-    const Allitem = [...items]
+    var Allitem = [...items]
+
+    const itemName = itemTable.find((x) => {return x.barcode == lItemCode })?.name
+    
+    if (!itemName || itemName.length < 1) {
+      alert("This is item is not defined")
+      return;
+    }
 
     const ItemIndex = Allitem.findIndex(item => item.item == lItemCode)
 
     if ( ItemIndex >= 0 ){
-      Allitem[ItemIndex] = {item: lItemCode, qty: Allitem[ItemIndex].qty + lqty}
+      if(Allitem[ItemIndex].qty + lqty <= 0 ){
+        Allitem.splice(ItemIndex, 1)
+      }else{
+        Allitem[ItemIndex] = {item: lItemCode, qty: Allitem[ItemIndex].qty + lqty, item_name: itemName}
+      }
     }else{
-      Allitem.push({qty: lqty, item:lItemCode})
+      Allitem.push({qty: lqty, item:lItemCode, item_name: itemName})
     }
 
-    setQty("1")
-
-    // console.log(lqty)
     setItems(Allitem)
-    setitemCode("")
+
+    
 
 
   }
@@ -203,7 +243,7 @@ export default function InventoryScreen(props) {
             </View> */}
           <ScrollView>
                 { items.map(item => {
-                  return ( <TableRow key={item.item} qty={(item.qty).toString()} item={item.item} /> )
+                  return ( <TableRow key={item.item} qty={(item.qty).toString()} item={item.item} item_name={item.item_name}/> )
                 }) }
                 
           </ScrollView>
@@ -232,7 +272,7 @@ const TableRow = (props) => {
   return (
     <View style={{flexDirection:"row"}}>
         <View style={{ flex:5}}>
-              <Text style={{flex:1,backgroundColor:"white", borderColor:"black", borderWidth:1, textAlign:"left", paddingLeft:15, color:"black", height:40, textAlignVertical:"center"}}>{props.qty}</Text>
+              <Text style={{flex:1,backgroundColor:"white", borderColor:"black", borderWidth:1, textAlign:"left", paddingLeft:15, color:"black", height:40, textAlignVertical:"center"}}>{props.item_name}</Text>
               <Text style={{flex:1,backgroundColor:"white", borderColor:"black", borderWidth:1, textAlign:"left", paddingLeft:15, color:"black", height:40, textAlignVertical:"center"}}>{props.item}</Text>
         </View>
         <View style={{ flex:1}}>
@@ -241,12 +281,3 @@ const TableRow = (props) => {
     </View>
   )
 }
-
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'center',
-  }
-});
