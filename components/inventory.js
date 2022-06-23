@@ -42,25 +42,20 @@ export default function InventoryScreen(props) {
       await RNFS.mkdir(dir);
     }
   }
-  async function LoadFromFile (fileName= "store1.txt") {
+  async function LoadFromFile () {
     try{ 
+      fileName = `store${store}.txt`
       await GetFile()
       const FilePath = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/" + fileName;
       const file = await RNFS.readFile(FilePath, 'utf8');
+      setItems( JSON.parse(file) )
+      console.log("Loaded from file: " + fileName)  
     }catch(e){
       console.log(e)
       // alert("Error loading file")
     }
-    try{
-      setItems( JSON.parse(file) )
-      console.log("Loaded from file: " + fileName)  
-    }catch(err){
-      console.log(err)
-      // alert("Error loading file")
-    }
     
   }
-
   async function saveToFile (){
     await GetFile()
     const Filename = "store" + store + ".txt";
@@ -76,8 +71,6 @@ export default function InventoryScreen(props) {
         alert("Error saving to file")
       });
   }
-  
-
   async function LoadItemsTable() {
     try{ 
       await GetFile()
@@ -98,7 +91,7 @@ export default function InventoryScreen(props) {
 
   (async () => {
     await LoadItemsTable()
-    LoadFromFile("store1.txt");
+    LoadFromFile();
     console.log(Settings)
     console.log("Items in file: " + itemTable.length)
 
