@@ -86,7 +86,6 @@ export default function InventoryScreen(props) {
     }
   }
 
-
   useEffect(() => {
 
   (async () => {
