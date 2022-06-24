@@ -32,6 +32,7 @@ Keep in mind that the later option is gonna send a copy of your source code to b
 
 and both produce an unsigned apk that cannot be published directly to the playstore
 <hr>
+
 ### Credits & license
 This project was built by **Abdullah Osama** for TrueTechEg 2022.
 
