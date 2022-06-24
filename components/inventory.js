@@ -1,20 +1,28 @@
+import { useFocusEffect, useNavigationState } from '@react-navigation/native';
 import React, { useState, useEffect, useContext } from 'react';
 import { Text, View, StyleSheet, Button, Image, TextInput, ScrollView, TouchableOpacity, PermissionsAndroid } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { Audio } from 'expo-av';
 import { SettingsContext } from '../App';
 import { tsvParse } from 'd3-dsv';
+import react from 'react';
 // import * as FileSystem from 'expo-file-system';
 var RNFS = require('react-native-fs');
 
 // import MaskedView from '@react-native-masked-view/masked-view';
 
 export default function InventoryScreen(props) {
-  const Settings  = useContext(SettingsContext);
+  const {Settings, changeSettings} = useContext(SettingsContext);
+
   const [itemTable, setitemTable] = React.useState( [] );
   const { navigation } = props;
   const [store, setStore] = React.useState("1")
   
+  useEffect(() => {
+    setStore(Settings.store)
+  }, [Settings])
+
+
   async function askStoragePermission(){
 
     try {
@@ -44,7 +52,7 @@ export default function InventoryScreen(props) {
   }
   async function LoadFromFile () {
     try{ 
-      fileName = `store${store}.txt`
+      const fileName = `store${Settings.store}.txt`
       await GetFile()
       const FilePath = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/" + fileName;
       const file = await RNFS.readFile(FilePath, 'utf8');
@@ -52,13 +60,14 @@ export default function InventoryScreen(props) {
       console.log("Loaded from file: " + fileName)  
     }catch(e){
       console.log(e)
+      setItems([])
       // alert("Error loading file")
     }
     
   }
   async function saveToFile (){
     await GetFile()
-    const Filename = "store" + store + ".txt";
+    const Filename = "store" + Settings.store + ".txt";
     const FileContent = JSON.stringify( items );
     const FilePath = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/" + Filename;
     RNFS.writeFile(FilePath, FileContent, 'utf8')
@@ -95,8 +104,22 @@ export default function InventoryScreen(props) {
     console.log("Items in file: " + itemTable.length)
 
   })();
+
+  return( () => {
+
+  })
   }, [])
-  
+  useFocusEffect( 
+    react.useCallback(
+      () => {
+        (async () => {
+          LoadFromFile()    
+        })();
+       },
+      [Settings]
+      )
+    
+  )
   // sounds
   const [sound, setSound] = React.useState();
   async function playSound() {
@@ -204,7 +227,7 @@ export default function InventoryScreen(props) {
           <TouchableOpacity onPress={() => {navigation.openDrawer()}}>
             <Image source={require("../images/menu.png")} style={{marginLeft:10}} />
           </TouchableOpacity>
-          <Text> Store 1 - Inventory </Text>
+          <Text> Store {Settings.store} - Inventory </Text>
           <TouchableOpacity onPress={saveToFile}>
             <Image source={require("../images/isave.png")} style={{height:50, width:50, marginRight:10}} ></Image>
           </TouchableOpacity>

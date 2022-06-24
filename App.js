@@ -12,7 +12,17 @@ import LoginScreen from './components/login';
 const Drawer = createDrawerNavigator();
 export const SettingsContext = React.createContext(defaultAppSettings);
 
+const changeSetting = (state, action) => {
+  let NewSettings = { ...state};
+  NewSettings[action.key] = action.value;
+  // console.log(state)
+  return NewSettings;
+}
+
+
 export default function App() {
+
+  const [Settings, changeSettings] = React.useReducer(changeSetting, defaultAppSettings)
   useEffect(() => {
     // run on the start of the application
 
@@ -22,9 +32,9 @@ export default function App() {
   }, [])
 
   return (
-    <SettingsContext.Provider value={defaultAppSettings}>
+    <SettingsContext.Provider value={{Settings: Settings, changeSettings: changeSettings}}>
       <NavigationContainer>
-        <Drawer.Navigator initialRouteName="inventory" screenOptions={{headerShown: false}}>
+        <Drawer.Navigator initialRouteName="stores" screenOptions={{headerShown: false}}>
           <Drawer.Screen name="inventory" component={InventoryScreen} />
           <Drawer.Screen name="settings" component={SettingsScreen} />
           <Drawer.Screen name="login" component={LoginScreen} />
