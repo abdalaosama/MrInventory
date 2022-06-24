@@ -35,7 +35,7 @@ export default function App() {
     <SettingsContext.Provider value={{Settings: Settings, changeSettings: changeSettings}}>
       <NavigationContainer>
         <Drawer.Navigator initialRouteName="stores" screenOptions={{headerShown: false}}>
-          <Drawer.Screen name="inventory" component={InventoryScreen} />
+          <Drawer.Screen name="inventory" component={InventoryScreen} options={{ unmountOnBlur:true}} />
           <Drawer.Screen name="settings" component={SettingsScreen} />
           <Drawer.Screen name="login" component={LoginScreen} />
           <Drawer.Screen name="stores" component={StoresScreen} />
