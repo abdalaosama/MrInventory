@@ -11,10 +11,12 @@ Mr inventory is the app which will help you manage your entire inventory.
 - make sure you have expo installed by running
 `npm install -g expo-cli`<br>
 <hr>
+
 ### to start the project on your device
 - connect your phone to your device using a cable or start your Android Virtual Device
 - run `expo run:android`
 <hr>
+
 ### To build the project
 you can build the project using one of the following two methods
 
@@ -32,4 +34,4 @@ and both produce an unsigned apk that cannot be published directly to the playst
 <hr>
 ### Credits & license
 This project was built by **Abdullah Osama** for TrueTechEg 2022.
- 
+
