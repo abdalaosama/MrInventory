@@ -1,6 +1,5 @@
 import react from "react";
 import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
-import ActionButton from "./shared/actionButton";
 import { SettingsContext } from '../App';
 
 export default function StoresScreen ( props ){
