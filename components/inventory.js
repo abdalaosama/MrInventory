@@ -1,186 +1,160 @@
 import { useFocusEffect, useNavigationState } from '@react-navigation/native';
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useCallback } from 'react';
 import { Text, View, StyleSheet, Button, Image, TextInput, ScrollView, TouchableOpacity, PermissionsAndroid } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { Audio } from 'expo-av';
-import { SettingsContext } from '../App';
 import { tsvParse } from 'd3-dsv';
-import react from 'react';
-// import * as FileSystem from 'expo-file-system';
 var RNFS = require('react-native-fs');
 
-// import MaskedView from '@react-native-masked-view/masked-view';
+import { SettingsContext } from '../App';
 
-export default function InventoryScreen(props) {
-  const {Settings, changeSettings} = useContext(SettingsContext);
-
-  const [itemTable, setitemTable] = React.useState( [] );
-  const { navigation } = props;
-  const [store, setStore] = React.useState("1")
+export default function InventoryScreen({ navigation }) {
   
+  const {Settings, changeSettings} = useContext(SettingsContext);
+  
+  const [itemTable, setitemTable] = useState([]);
+  const [items, setItems] = useState([])
+  const [sound, setSound] = useState();
+  
+  const [hasPermission, setHasPermission] = useState(null);
+  const [scanned, setScanned] = useState(false);
+  
+  const [itemCode, setitemCode] = useState("")
+  const [Qty, setQty] = useState("1");
+
   useEffect(() => {
-    setStore(Settings.store)
-  }, [Settings])
+    (async () => {
+      console.log("------------------------------------")
+      console.log("Loading The inventory Screen ")
+      setHasPermission( await askforAllPermissions() );
 
+      console.log('Loading Beeb Sound');
+      const { sound } = await Audio.Sound.createAsync(require('../sounds/beeb.mp3'));
+      setSound(sound);
+  
+      await LoadItemsCatalog();
+      await LoadInventortyFromStoreFile();
+      console.log("Items in catalog: " + itemTable.length)
+    })();
+    
+    return( () => {
+      //runs on component Destruction
+    })
+  }, [])
 
-  async function askStoragePermission(){
+  useFocusEffect( 
+    useCallback(
+      () => {
+        (async () => {
+          LoadInventortyFromStoreFile()    
+        })();
+      },[Settings]))
 
-    try {
-      const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+  async function askforAllPermissions(){
+    try{
+      const WRITE_EXTERNAL_STORAGE = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+      const READ_EXTERNAL_STORAGE = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
+      const { status } = await BarCodeScanner.requestPermissionsAsync();
+      
+      if (WRITE_EXTERNAL_STORAGE === PermissionsAndroid.RESULTS.GRANTED && READ_EXTERNAL_STORAGE == PermissionsAndroid.RESULTS.GRANTED && status == "granted") {
         return true;
       } else {
-        console.log("Storage permission denied");
+        alert("permissions denied, please make sure this app has permission to read/write to External storage and Camera");
+        console.log("Permissions Denied")
+        console.log(WRITE_EXTERNAL_STORAGE)
+        console.log(READ_EXTERNAL_STORAGE)
+        console.log(status)
         return false;
       }
-    } catch (err) {
+
+    }catch (e) {
       console.warn(err);
       return false;
     }
   }
-  askStoragePermission();
-  async function GetFile(){
+  async function EnsureWorkDirectoryExists(){
+    // makes sure The Directory needed for the program to run exists
+    try{
+      const dir = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/"
+      console.log(`Made Sure this Directory Exists: ${dir}`);
+      const exists = await RNFS.exists(dir);  // check if file exists
+  
+      if (!exists) {
+        await RNFS.mkdir(dir);
+      }
+    }catch(err){
+      console.warn(err)
+      throw(new Error("Couldn't Ensure work Directory Exists"))
+    }
 
-    // make sure file directory exists
-    const dir = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/"
-    console.log(dir);
-    const exists = await RNFS.exists(dir);  // check if file exists
+  }
+  async function LoadItemsCatalog() {
+    try{ 
+      await EnsureWorkDirectoryExists()
+      const FilePath = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/items.txt";
+      const file = await RNFS.readFile(FilePath, 'utf8');
+      const parsed = tsvParse("barcode\tname\n"+file) ;
+      setitemTable(parsed)
 
-    if (!exists) {
-      await RNFS.mkdir(dir);
+      console.log(`Loaded the items catalog from file: ${FilePath}`)
+    }catch(err){
+      console.warn(err)
+      alert("Error loading items catalog from file")
     }
   }
-  async function LoadFromFile () {
+  async function LoadInventortyFromStoreFile () {
     try{ 
+      await EnsureWorkDirectoryExists()
       const fileName = `store${Settings.store}.txt`
-      await GetFile()
       const FilePath = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/" + fileName;
       const file = await RNFS.readFile(FilePath, 'utf8');
       setItems( JSON.parse(file) )
-      console.log("Loaded from file: " + fileName)  
+      console.log("Loaded inventory from file: " + FilePath)  
     }catch(e){
-      console.log(e)
+      console.warn(e)
       setItems([])
       // alert("Error loading file")
     }
     
   }
-  async function saveToFile (){
-    await GetFile()
+  async function SaveFromInventoryToStoreFile (){
+    await EnsureWorkDirectoryExists()
     const Filename = "store" + Settings.store + ".txt";
     const FileContent = JSON.stringify( items );
     const FilePath = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/" + Filename;
     RNFS.writeFile(FilePath, FileContent, 'utf8')
     .then((success) => {
       alert("Saved Successfully  :) ")
-        console.log('FILE WRITTEN!');
+        console.log(`Saved Inventory Successfully to file: ${FilePath}`);
       })
       .catch((err) => {
-        console.log(err.message);
+        console.warn(err);
         alert("Error saving to file")
       });
   }
-  async function LoadItemsTable() {
-    try{ 
-      await GetFile()
-      const FilePath = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/items.txt";
-      const file = await RNFS.readFile(FilePath, 'utf8');
-      const parsed = tsvParse("barcode\tname\n"+file) ;
-      setitemTable(parsed)
-
-      console.log("Loaded the items from file ")
-    }catch(err){
-      console.log(err)
-      alert("Error loading items from file")
-    }
-  }
-
-  useEffect(() => {
-
-  (async () => {
-    await LoadItemsTable()
-    LoadFromFile();
-    console.log(Settings)
-    console.log("Items in file: " + itemTable.length)
-
-  })();
-
-  return( () => {
-
-  })
-  }, [])
-  useFocusEffect( 
-    react.useCallback(
-      () => {
-        (async () => {
-          LoadFromFile()    
-        })();
-       },
-      [Settings]
-      )
-    
-  )
-  // sounds
-  const [sound, setSound] = React.useState();
   async function playSound() {
-    console.log('Loading Sound');
-    const { sound } = await Audio.Sound.createAsync(
-       require('../sounds/beeb.mp3')
-    );
-    setSound(sound);
-
     console.log('Playing Sound');
-    await sound.playAsync(); }
-
-  React.useEffect(() => {
-    return sound
-      ? () => {
-          console.log('Unloading Sound');
-          sound.unloadAsync(); }
-      : undefined;
-  }, [sound]);
-  //------------------------------------------------------------
-  //camera permissions
-  const [hasPermission, setHasPermission] = useState(null);
-  const [scanned, setScanned] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      const { status } = await BarCodeScanner.requestPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
-
-  const handleBarCodeScanned = ({ type, data }) => {
+    await sound.replayAsync(); 
+  }
+  function handleBarCodeScanned({ type, data }) {
     console.log("Barcode Scanned: " + data + " Type: " + type)
     setScanned(true)
     setitemCode(data)
-    addItem(data, parseInt(Qty))
-    // alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+    addToInventory(data, parseInt(Qty))
     setTimeout(() => {
       setScanned(false)
     }, Settings.ScanCoolDown)
   };
-
-  //------------------------------------------------------------
-  //inputs
-  const [Qty, setQty] = useState("1");
-  const [itemCode, setitemCode] = useState("")
-  //------------------------------------------------------------
-  //items
-  const [items, setItems] = useState([])
-
-  function addItem(lItemCode, lqty ){
-    console.log("Item Added: " + lItemCode + " Qty: " + lqty)
+  function addToInventory(lItemCode, lqty ){
+    console.log("Attempting to add Items: " + lItemCode + " Qty: " + lqty)
+    playSound();
     setQty("1")
     setitemCode("")
-    playSound();
 
     if(lqty == 0 || isNaN(lqty)) return; 
     if(!lItemCode || lItemCode.length <= 0) return; 
 
     var Allitem = [...items]
-
     const itemName = itemTable.find((x) => {return x.barcode == lItemCode })?.name
     
     if (!itemName || itemName.length < 1) {
@@ -190,32 +164,24 @@ export default function InventoryScreen(props) {
 
     const ItemIndex = Allitem.findIndex(item => item.item == lItemCode)
 
-    if ( ItemIndex >= 0 ){
+    if ( ItemIndex >= 0 ){ // if item is in inventory
       if(Allitem[ItemIndex].qty + lqty <= 0 ){
+        // if the qty after modification is less than or equal to 0
+        // to remove the item if qty get below 0
+
+        //remove the item
         Allitem.splice(ItemIndex, 1)
       }else{
+        //else make the modification
         Allitem[ItemIndex] = {item: lItemCode, qty: Allitem[ItemIndex].qty + lqty, item_name: itemName}
       }
     }else{
+      //else add new item
       Allitem.push({qty: lqty, item:lItemCode, item_name: itemName})
     }
 
     setItems(Allitem)
-
-    
-
-
   }
-  //------------------------------------------------------------
-
-
-  if (hasPermission === null) {
-    return <Text>Requesting for camera permission</Text>;
-  }
-  if (hasPermission === false) {
-    return <Text>No access to camera</Text>;
-  }
-  
   return (
 
     <View style={{flex:1, backgroundColor:"white"}}>
@@ -228,7 +194,7 @@ export default function InventoryScreen(props) {
             <Image source={require("../images/menu.png")} style={{marginLeft:10}} />
           </TouchableOpacity>
           <Text> Store {Settings.store} - Inventory </Text>
-          <TouchableOpacity onPress={saveToFile}>
+          <TouchableOpacity onPress={SaveFromInventoryToStoreFile}>
             <Image source={require("../images/save.png")} style={{height:50, width:50, marginRight:10}} ></Image>
           </TouchableOpacity>
         </View>
@@ -252,16 +218,12 @@ export default function InventoryScreen(props) {
               />
           </View>
           <View style={{backgroundColor:"#EDEDED", flex:1, padding: 10, borderWidth:1}}>            
-            {/* <View style={{flexDirection:"row"}}>
-              <Text style={{flex:1, borderColor:"black", borderWidth:0.5, backgroundColor:"lightblue", textAlign:"center", color:"white", height:40, textAlignVertical:"center", fontWeight:"bold"}}>QTY</Text>
-              <Text style={{flex:1, borderColor:"black", borderWidth:0.5, backgroundColor:"lightblue", textAlign:"center", color:"white", height:40, textAlignVertical:"center", fontWeight:"bold"}}>ITEM</Text>
-            </View> */}
-          <ScrollView>
-                { items.map(item => {
-                  return ( <TableRow key={item.item} qty={(item.qty).toString()} item={item.item} item_name={item.item_name}/> )
-                }) }
-                
-          </ScrollView>
+            <ScrollView>
+              { items.map(item => {
+                return ( <TableRow key={item.item} qty={(item.qty).toString()} item={item.item} item_name={item.item_name}/> )
+              }) }
+
+            </ScrollView>
           </View>
         </View>
 
@@ -269,21 +231,18 @@ export default function InventoryScreen(props) {
             <View style={{position:"absolute", left:5, top:5, backgroundColor:"#EDEDED", width:100, alignItems:"center", borderWidth:1}}>
               <Text style={{fontSize:20}}>{items.length}</Text>
             </View>
-            <TouchableOpacity onPress={() => {addItem(itemCode, parseInt(Qty))}} style={{
+            <TouchableOpacity onPress={() => {addToInventory(itemCode, parseInt(Qty))}} style={{
               backgroundColor:"#D6F0FF", width:100, height:100, borderRadius:100, justifyContent:'center', alignItems:'center', borderWidth:2, borderColor:"#00A3FF"
               }}>
               <Image source={require("../images/down.png")} style={{width:50, height:50}} />
             </TouchableOpacity>
         </View>
       </View>
-
-      {/* {scanned && <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />} */}
     </View>
   );
 }
 
 const TableRow = (props) => {
-
   return (
     <View style={{flexDirection:"row"}}>
         <View style={{ flex:5}}>
