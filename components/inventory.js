@@ -229,7 +229,7 @@ export default function InventoryScreen(props) {
           </TouchableOpacity>
           <Text> Store {Settings.store} - Inventory </Text>
           <TouchableOpacity onPress={saveToFile}>
-            <Image source={require("../images/isave.png")} style={{height:50, width:50, marginRight:10}} ></Image>
+            <Image source={require("../images/save.png")} style={{height:50, width:50, marginRight:10}} ></Image>
           </TouchableOpacity>
         </View>
         
