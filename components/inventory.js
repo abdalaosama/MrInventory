@@ -210,11 +210,13 @@ export default function InventoryScreen({ navigation }) {
               <TextInput style={{ borderWidth:2, flex:3, backgroundColor:"#EDEDED",height:60, textAlign:"center", fontSize:15, marginHorizontal:3}}
               onChangeText={setitemCode}
               value={itemCode}
+              placeholder="Item Barcode"
               />
               <TextInput style={{ borderWidth:2, flex:1, backgroundColor:"#EDEDED" ,height:60, textAlign:"center", fontSize:30, marginHorizontal:3}}
               onChangeText={setQty}
               value={Qty}
               keyboardType={"numeric"}
+              placeholder="Qty"
               />
           </View>
           <View style={{backgroundColor:"#EDEDED", flex:1, padding: 10, borderWidth:1}}>            
