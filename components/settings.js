@@ -1,6 +1,8 @@
 import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native"
+import CheckBoxE from "./shared/CheckBox";
 import FileSelector from "./shared/fileSelector"
-
+import Seprator from "./shared/seprator";
+import TextField from "./shared/textField";
 export default function SettingsScreen(props){
     
     return (
@@ -14,8 +16,18 @@ export default function SettingsScreen(props){
             </View>
             <ScrollView style={{ flex:1, padding:10}}>
                 <View style={{flex:1}}>
-                    <FileSelector onFileSelect={(fileResult) => {alert(fileResult.type == "success"?fileResult.uri:"Selection Canceled")}} label="Folder" />
-                    <FileSelector onFileSelect={(fileResult) => {alert(fileResult.type == "success"?fileResult.uri:"Selection Canceled")}} label="File 2" />
+                    <Seprator label="Files" /> 
+                    <FileSelector label="Items Catalog File (TSV)" />
+                    <TextField  label="working Directory name" value="admin"/>
+                    <Seprator label="barcode" />
+                    <CheckBoxE label="Enable Barcode Scanner" />
+                    <CheckBoxE label="Remove Leading zeros (UPC-A)" />
+                    <CheckBoxE label="Remove Leading zeros (UPC-E)" />
+                    <CheckBoxE label="Remove Leading zeros (EAN13)" />
+                    <CheckBoxE label="Remove Leading zeros (EAN8)" />
+                    <CheckBoxE label="Remove Leading zeros (code-128)" />
+                    <CheckBoxE label="Remove Leading zeros (code-39)" />
+
                 </View>
             </ScrollView>
         </View>
