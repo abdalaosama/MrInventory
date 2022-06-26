@@ -3,7 +3,7 @@ import {View, Text} from "react-native";
 
 export default function Seprator(props) {
     return (
-        <View style={{flex:1, marginBottom:10}}>
+        <View style={{flex:1, marginVertical:15}}>
             <Text style={{color: props.labelColor || props.color || 'black'}}>{props.label}</Text>
             <View style={{height: props.thickness || 2, backgroundColor:props.color || "black"}}></View>
         </View>
