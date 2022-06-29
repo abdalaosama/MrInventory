@@ -7,6 +7,9 @@ const defaultAppSettings = {
 
     ScanCoolDown: 2000,
     store: "1",
+
+    EnableBarcodeCamera: true,
+    
 }
 
 

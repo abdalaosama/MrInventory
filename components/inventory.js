@@ -167,7 +167,7 @@ export default function InventoryScreen({ navigation }) {
 
     <View style={{flex:1, backgroundColor:"white"}}>
 
-      <BarCodeScanner onBarCodeScanned={scanned ? undefined : handleBarCodeScanned} style={{position:"absolute", top:-200, bottom:200, left:0, right:0 }} ></BarCodeScanner>
+      {Settings.EnableBarcodeCamera?<BarCodeScanner onBarCodeScanned={scanned ? undefined : handleBarCodeScanned} style={{position:"absolute", top:-200, bottom:200, left:0, right:0 }} ></BarCodeScanner>:undefined}
       <View style={{flex:1, elevation:2, flexDirection:"column"}}>
 
         <View style={{height:80, backgroundColor:'white', justifyContent:"space-between", alignItems:"center", flexDirection:"row"}}>
@@ -180,10 +180,10 @@ export default function InventoryScreen({ navigation }) {
           </TouchableOpacity>
         </View>
         
-        <View style={{height:100, backgroundColor:'transparent', justifyContent:"center", padding:5 }}>
+        {Settings.EnableBarcodeCamera?<View style={{height:100, backgroundColor:'transparent', justifyContent:"center", padding:5 }}>
           
-          <View style={{height:StyleSheet.hairlineWidth, backgroundColor:"red"}}></View>
-        </View>
+         <View style={{height:StyleSheet.hairlineWidth, backgroundColor:"red"}}></View> 
+        </View>: undefined }
 
         <View style={{flex:1, backgroundColor:'white', flexDirection:"column", padding:5}}>
           

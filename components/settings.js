@@ -30,7 +30,7 @@ export default function SettingsScreen(props){
                     <FileSelector label="Items Catalog File (TSV)" onFileSelect={(result) => {changeSettings({key:"itemCatalogFile", value:result.uri})}} defaultPath={Settings.itemCatalogFile} copyPath={RNFS.ExternalStorageDirectoryPath+Settings.ExportFilesPath+"/items.txt"} />
                     <TextField  label="working Directory name" value={Settings.ExportFilesPath} onChange={(result) => {changeSettings({key:"ExportFilesPath", value:result})}}/>
                     <Seprator label="barcode" />
-                    <CheckBoxE label="Enable Barcode Scanner" />
+                    <CheckBoxE label="Enable Barcode Scanner" value={Settings.EnableBarcodeCamera} onChange={(e) => { changeSettings({key:"EnableBarcodeCamera", value:e}) }} />
                     <CheckBoxE label="Remove Leading zeros (UPC-A)" />
                     <CheckBoxE label="Remove Leading zeros (UPC-E)" />
                     <CheckBoxE label="Remove Leading zeros (EAN13)" />
