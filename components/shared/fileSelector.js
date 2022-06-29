@@ -9,10 +9,27 @@ export default function FileSelector(props) {
 
     return (
     <TouchableOpacity onPress={ async () => {
-        const result = await DocumentPicker.getDocumentAsync({copyToCacheDirectory:false});
-        props.onFileSelect(result)
+        try {
+            const result = await DocumentPicker.getDocumentAsync({copyToCacheDirectory:true});
+            if(result.type == 'success'){
+                result.uri = decodeURIComponent(result.uri)
+                console.log(result.uri)
+                if ( props.copyPath ) {
+                    await RNFS.copyFile(result.uri, props.copyPath);
+                    result.uri = props.copyPath
+                }
+                result.uri = (await RNFS.stat(result.uri)).originalFilepath
+                // const filepath = await RNGRP.getRealPathFromURI(fileUri)
+                // result.uri = filepath;
+                setPath(result.uri);
+            }
+            props.onFileSelect(result)    
+        } catch (error) {
+            console.warn(error)
+            alert("Error Picking File")
+            props.onFileSelect({type:"fail"})
+        }
         
-        if(result.type == 'success') setPath(result.uri);
         
     }}
     style={{flexDirection:"row", backgroundColor:"#ededed", padding:10, borderRadius:5, marginBottom:10}}

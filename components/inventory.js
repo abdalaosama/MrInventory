@@ -1,6 +1,7 @@
 import { useFocusEffect, useNavigationState } from '@react-navigation/native';
 import { useState, useEffect, useContext, useCallback } from 'react';
 import { Text, View, StyleSheet, Button, Image, TextInput, ScrollView, TouchableOpacity, PermissionsAndroid } from 'react-native';
+import askforAllPermissions from './shared/permissions';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { Audio } from 'expo-av';
 import { tsvParse } from 'd3-dsv';
@@ -50,28 +51,7 @@ export default function InventoryScreen({ navigation }) {
         })();
       },[Settings]))
 
-  async function askforAllPermissions(){
-    try{
-      const WRITE_EXTERNAL_STORAGE = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
-      const READ_EXTERNAL_STORAGE = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
-      const { status } = await BarCodeScanner.requestPermissionsAsync();
-      
-      if (WRITE_EXTERNAL_STORAGE === PermissionsAndroid.RESULTS.GRANTED && READ_EXTERNAL_STORAGE == PermissionsAndroid.RESULTS.GRANTED && status == "granted") {
-        return true;
-      } else {
-        alert("permissions denied, please make sure this app has permission to read/write to External storage and Camera");
-        console.log("Permissions Denied")
-        console.log(WRITE_EXTERNAL_STORAGE)
-        console.log(READ_EXTERNAL_STORAGE)
-        console.log(status)
-        return false;
-      }
 
-    }catch (e) {
-      console.warn(err);
-      return false;
-    }
-  }
   async function EnsureWorkDirectoryExists(){
     // makes sure The Directory needed for the program to run exists
     try{
@@ -91,10 +71,11 @@ export default function InventoryScreen({ navigation }) {
   async function LoadItemsCatalog() {
     try{ 
       await EnsureWorkDirectoryExists()
-      const FilePath = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/items.txt";
+      const FilePath = Settings.itemCatalogFile;
       const file = await RNFS.readFile(FilePath, 'utf8');
       const parsed = tsvParse("barcode\tname\n"+file) ;
       setitemTable(parsed)
+      console.log(parsed)
 
       console.log(`Loaded the items catalog from file: ${FilePath}`)
     }catch(err){
