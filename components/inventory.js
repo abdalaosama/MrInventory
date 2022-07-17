@@ -136,11 +136,11 @@ export default function InventoryScreen({ navigation }) {
     if(!lItemCode || lItemCode.length <= 0) return; 
 
     var Allitem = [...items]
-    const itemName = itemTable.find((x) => {return x.barcode == lItemCode })?.name
+    let itemName = itemTable.find((x) => {return x.barcode == lItemCode })?.name
     
     if (!itemName || itemName.length < 1) {
-      alert("This is item is not defined")
-      return;
+      alert("This is item is not Unknown/New");
+      itemName = "Unknown Item";
     }
 
     const ItemIndex = Allitem.findIndex(item => item.item == lItemCode)
