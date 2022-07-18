@@ -1,6 +1,6 @@
 import { useFocusEffect, useNavigationState } from '@react-navigation/native';
 import { useState, useEffect, useContext, useCallback } from 'react';
-import { Text, View, StyleSheet, Button, Image, TextInput, ScrollView, TouchableOpacity, PermissionsAndroid } from 'react-native';
+import { Text, View, StyleSheet, Button, Image, TextInput, ScrollView, TouchableOpacity, PermissionsAndroid, ToastAndroid } from 'react-native';
 import askforAllPermissions from './shared/permissions';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { Audio } from 'expo-av';
@@ -75,12 +75,11 @@ export default function InventoryScreen({ navigation }) {
       const file = await RNFS.readFile(FilePath, 'utf8');
       const parsed = tsvParse("barcode\tname\n"+file) ;
       setitemTable(parsed)
-      console.log(parsed)
 
       console.log(`Loaded the items catalog from file: ${FilePath}`)
     }catch(err){
       console.warn(err)
-      alert("Error loading items catalog from file")
+      ToastAndroid.show("Error loading items catalog from file", ToastAndroid.SHORT)
     }
   }
   async function LoadInventortyFromStoreFile () {
@@ -139,7 +138,7 @@ export default function InventoryScreen({ navigation }) {
     let itemName = itemTable.find((x) => {return x.barcode == lItemCode })?.name
     
     if (!itemName || itemName.length < 1) {
-      alert("This is item is not Unknown/New");
+      ToastAndroid.show("This is item is Unknown/New", ToastAndroid.SHORT);
       itemName = "Unknown Item";
     }
 
