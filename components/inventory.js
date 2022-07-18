@@ -76,6 +76,7 @@ export default function InventoryScreen({ navigation }) {
       const parsed = tsvParse("barcode\tname\n"+file) ;
       setitemTable(parsed)
 
+      console.log(parsed[1])
       console.log(`Loaded the items catalog from file: ${FilePath}`)
     }catch(err){
       console.warn(err)
@@ -136,10 +137,12 @@ export default function InventoryScreen({ navigation }) {
 
     var Allitem = [...items]
     let itemName = itemTable.find((x) => {return x.barcode == lItemCode })?.name
-    
+
     if (!itemName || itemName.length < 1) {
       ToastAndroid.show("This is item is Unknown/New", ToastAndroid.SHORT);
       itemName = "Unknown Item";
+    }else{
+      ToastAndroid.show(`Added item: ${itemName}`, ToastAndroid.SHORT)
     }
 
     const ItemIndex = Allitem.findIndex(item => item.item == lItemCode)
@@ -203,7 +206,7 @@ export default function InventoryScreen({ navigation }) {
             <ScrollView>
               { items.map(item => {
                 return ( <TableRow key={item.item} qty={(item.qty).toString()} item={item.item} color={item.item_name == "Unknown Item"?"red":"black"} item_name={item.item_name} /> )
-              }) }
+              }).reverse() }
 
             </ScrollView>
           </View>
