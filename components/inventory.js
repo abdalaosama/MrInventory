@@ -190,7 +190,7 @@ export default function InventoryScreen({ navigation }) {
               <TextInput style={{ borderWidth:2, flex:3, backgroundColor:"#EDEDED",height:60, textAlign:"center", fontSize:15, marginHorizontal:3}}
               onChangeText={setitemCode}
               value={itemCode}
-              placeholder="Item Barcode"
+              placeholder="Barcode"
               />
               <TextInput style={{ borderWidth:2, flex:1, backgroundColor:"#EDEDED" ,height:60, textAlign:"center", fontSize:30, marginHorizontal:3}}
               onChangeText={setQty}
@@ -199,10 +199,10 @@ export default function InventoryScreen({ navigation }) {
               placeholder="Qty"
               />
           </View>
-          <View style={{backgroundColor:"#EDEDED", flex:1, padding: 10, borderWidth:1}}>            
+          <View style={{backgroundColor:"#EDEDED", flex:1, padding: 5, borderWidth:0.5}}>            
             <ScrollView>
               { items.map(item => {
-                return ( <TableRow key={item.item} qty={(item.qty).toString()} item={item.item} item_name={item.item_name}/> )
+                return ( <TableRow key={item.item} qty={(item.qty).toString()} item={item.item} color={item.item_name == "Unknown Item"?"red":"black"} item_name={item.item_name} /> )
               }) }
 
             </ScrollView>
@@ -225,14 +225,14 @@ export default function InventoryScreen({ navigation }) {
 }
 
 const TableRow = (props) => {
+
   return (
-    <View style={{flexDirection:"row"}}>
-        <View style={{ flex:5}}>
-              <Text style={{flex:1,backgroundColor:"white", borderColor:"black", borderWidth:1, textAlign:"left", paddingLeft:15, color:"black", height:40, textAlignVertical:"center"}}>{props.item_name}</Text>
-              <Text style={{flex:1,backgroundColor:"white", borderColor:"black", borderWidth:1, textAlign:"left", paddingLeft:15, color:"black", height:40, textAlignVertical:"center"}}>{props.item}</Text>
+    <View style={{flexDirection:"row", borderWidth:0.5}}>
+        <View style={{ flex:5 }}>
+          <Text style={{flex:1,backgroundColor:"white", borderColor:"black", borderWidth:0.5, textAlign:"left", paddingLeft:15, height:40, textAlignVertical:"center", color:props.color?props.color:"black"}}>{props.item}</Text>
         </View>
-        <View style={{ flex:1}}>
-        <Text style={{flex:1, fontSize:30, backgroundColor:"white", borderColor:"black", borderWidth:1, textAlign:"center", color:"black", height:40, textAlignVertical:"center"}}>{props.qty}</Text>
+        <View style={{ flex:1 }}>
+          <Text style={{flex:1, fontSize:30, backgroundColor:"white", borderColor:"black", borderWidth:0.5, textAlign:"center", height:40, textAlignVertical:"center", color:props.color?props.color:"black"}}>{props.qty}</Text>
         </View>
     </View>
   )
