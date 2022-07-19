@@ -6,7 +6,7 @@ import { SwipeItem, SwipeButtonsContainer, SwipeProvider } from 'react-native-sw
 import askforAllPermissions from './shared/permissions';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { Audio } from 'expo-av';
-import { tsvParse } from 'd3-dsv';
+import { tsvParse, tsvFormat } from 'd3-dsv';
 var RNFS = require('react-native-fs');
 
 import { SettingsContext } from '../App';
@@ -88,10 +88,11 @@ export default function InventoryScreen({ navigation }) {
   async function LoadInventortyFromStoreFile () {
     try{ 
       await EnsureWorkDirectoryExists()
-      const fileName = `store${Settings.store}.txt`
+      const fileName = `store${Settings.store}.txt`;
       const FilePath = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/" + fileName;
       const file = await RNFS.readFile(FilePath, 'utf8');
-      setItems( JSON.parse(file) )
+      
+      setItems( tsvParse(file) );
       console.log("Loaded inventory from file: " + FilePath)  
     }catch(e){
       console.warn(e)
@@ -103,7 +104,7 @@ export default function InventoryScreen({ navigation }) {
   async function SaveFromInventoryToStoreFile (){
     await EnsureWorkDirectoryExists()
     const Filename = "store" + Settings.store + ".txt";
-    const FileContent = JSON.stringify( items );
+    const FileContent = tsvFormat( items );
     const FilePath = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/" + Filename;
     RNFS.writeFile(FilePath, FileContent, 'utf8')
     .then((success) => {
@@ -133,7 +134,7 @@ export default function InventoryScreen({ navigation }) {
     playSound();
     setQty("1")
     setitemCode("")
-
+    lqty = parseInt(lqty);
     if(lqty == 0 || isNaN(lqty)) return; 
     if(!lItemCode || lItemCode.length <= 0) return; 
 
@@ -148,8 +149,9 @@ export default function InventoryScreen({ navigation }) {
     }
 
     const ItemIndex = Allitem.findIndex(item => item.item == lItemCode)
-
+    
     if ( ItemIndex >= 0 ){ // if item is in inventory
+      Allitem[ItemIndex].qty = parseInt(Allitem[ItemIndex].qty);
       if(Allitem[ItemIndex].qty + lqty <= 0 ){
         // if the qty after modification is less than or equal to 0
         // to remove the item if qty get below 0
