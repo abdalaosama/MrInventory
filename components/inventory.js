@@ -1,6 +1,8 @@
 import { useFocusEffect, useNavigationState } from '@react-navigation/native';
 import { useState, useEffect, useContext, useCallback } from 'react';
 import { Text, View, StyleSheet, Button, Image, TextInput, ScrollView, TouchableOpacity, PermissionsAndroid, ToastAndroid } from 'react-native';
+import { SwipeItem, SwipeButtonsContainer, SwipeProvider } from 'react-native-swipe-item';
+
 import askforAllPermissions from './shared/permissions';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { Audio } from 'expo-av';
@@ -142,7 +144,7 @@ export default function InventoryScreen({ navigation }) {
       ToastAndroid.show("This is item is Unknown/New", ToastAndroid.SHORT);
       itemName = "Unknown Item";
     }else{
-      ToastAndroid.show(`Added item: ${itemName}`, ToastAndroid.SHORT)
+      ToastAndroid.show(`${lqty < 1?"Removed":"Added"} item: ${itemName}`, ToastAndroid.SHORT)
     }
 
     const ItemIndex = Allitem.findIndex(item => item.item == lItemCode)
@@ -165,6 +167,39 @@ export default function InventoryScreen({ navigation }) {
 
     setItems(Allitem)
   }
+
+  const TableRow = (props) => {
+
+    return (
+      <SwipeItem style={{flexDirection:"row", borderWidth:0.5}} swipeContainerStyle={{flex:1}} leftButtons={ (
+        <SwipeButtonsContainer style={{
+          height:'100%',
+          backgroundColor:"red",
+          alignSelf: 'center',
+          justifyContent:"center",
+          // aspectRatio: 1,
+          flexDirection: 'column',
+          paddingHorizontal: 10,
+          overflow:"hidden"}}>
+            <TouchableOpacity style={{justifyContent:"center"}}
+                onPress={ props.onDelete }>
+                <Image source={require('../images/trash-can.png')} style= {{width:27,height:30}} blurRadius={4}></Image>
+            </TouchableOpacity>
+        </SwipeButtonsContainer>
+      )}>
+        <View style={{flexDirection:"row"}}>
+  
+            <View style={{ flex:5 }}>
+              <Text style={{flex:1, fontSize:20,backgroundColor:"white", borderColor:"black", borderWidth:0.5, textAlign:"left", paddingLeft:15, height:40, textAlignVertical:"center", color:props.color?props.color:"black"}}>{props.item}</Text>
+            </View>
+            <View style={{ flex:1 }}>
+              <Text style={{flex:1, fontSize:20, backgroundColor:"white", borderColor:"black", borderWidth:0.5, textAlign:"center", height:40, textAlignVertical:"center", color:props.color?props.color:"black"}}>{props.qty}</Text>
+            </View>
+        </View>
+      </SwipeItem>
+    )
+  }
+  
   return (
 
     <View style={{flex:1, backgroundColor:"white"}}>
@@ -204,10 +239,15 @@ export default function InventoryScreen({ navigation }) {
           </View>
           <View style={{backgroundColor:"#EDEDED", flex:1, padding: 5, borderWidth:0.5}}>            
             <ScrollView>
+              <SwipeProvider >
+
               { items.map(item => {
-                return ( <TableRow key={item.item} qty={(item.qty).toString()} item={item.item} color={item.item_name == "Unknown Item"?"red":"black"} item_name={item.item_name} /> )
+                return ( <TableRow key={item.item} qty={(item.qty).toString()} item={item.item} color={item.item_name == "Unknown Item"?"red":"black"} item_name={item.item_name} onDelete={() =>{
+                  addToInventory(item.item, item.qty * -1)
+                }}/> )
               }).reverse() }
 
+              </SwipeProvider>
             </ScrollView>
           </View>
         </View>
@@ -225,18 +265,7 @@ export default function InventoryScreen({ navigation }) {
       </View>
     </View>
   );
+
+  
 }
 
-const TableRow = (props) => {
-
-  return (
-    <View style={{flexDirection:"row", borderWidth:0.5}}>
-        <View style={{ flex:5 }}>
-          <Text style={{flex:1,backgroundColor:"white", borderColor:"black", borderWidth:0.5, textAlign:"left", paddingLeft:15, height:40, textAlignVertical:"center", color:props.color?props.color:"black"}}>{props.item}</Text>
-        </View>
-        <View style={{ flex:1 }}>
-          <Text style={{flex:1, fontSize:30, backgroundColor:"white", borderColor:"black", borderWidth:0.5, textAlign:"center", height:40, textAlignVertical:"center", color:props.color?props.color:"black"}}>{props.qty}</Text>
-        </View>
-    </View>
-  )
-}
