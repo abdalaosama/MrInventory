@@ -34,10 +34,10 @@ export default function App() {
   return (
     <SettingsContext.Provider value={{Settings: Settings, changeSettings: changeSettings}}>
       <NavigationContainer>
-        <Drawer.Navigator initialRouteName="inventory" screenOptions={{headerShown: false}}>
+        <Drawer.Navigator initialRouteName="login" screenOptions={{headerShown: false}}>
           <Drawer.Screen name="inventory" component={InventoryScreen} options={{ unmountOnBlur:true}} />
           <Drawer.Screen name="settings" component={SettingsScreen} />
-          <Drawer.Screen name="login" component={LoginScreen} />
+          <Drawer.Screen name="login" component={LoginScreen} options={{ swipeEnabled: false}} />
           <Drawer.Screen name="stores" component={StoresScreen} />
         </Drawer.Navigator>
       </NavigationContainer>
