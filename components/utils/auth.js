@@ -14,7 +14,6 @@ auth.CheckLogin = function(){
 
 auth.activate = function(){
 
-    
 }
 
 auth.doFullCheck = function (){
@@ -24,7 +23,6 @@ auth.doFullCheck = function (){
 auth.doOnBootCheck = function(){
 
 }
-
 
 
 module.exports = auth;
