@@ -1,7 +1,7 @@
  
 
 const defaultAppSettings = {
-    AuthServerHost: "http://localhost:8080",
+    AuthServerHost: "http://167.172.172.65/",
     itemCatalogFile: "/storage/emulated/0/admin/items.txt",
     ExportFilesPath: "/admin",
 

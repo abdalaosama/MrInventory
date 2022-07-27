@@ -8,8 +8,17 @@ export default function LoginScreen ( props ){
     const [checkBoxValue, setCheckBoxValue] = react.useState(false);
     const [usernameValue, setusernameValue] = react.useState("");
     const [passwordValue, setpasswordValue] = react.useState("");
-        
+    
+    react.useEffect(() => {
+        (async () => {
 
+
+        })();
+        return () => {
+
+
+        }
+    }, [])
 
     function LoginPress(e) {
 
