@@ -1,28 +1,44 @@
-let auth;
+import defaultAppSettings from '../defaults';
+import * as SecureStore from 'expo-secure-store';
 
-auth.login = function (username, password){
+const { AuthServerHost } = defaultAppSettings;
 
-}
-
-auth.getPublicKey = function(){
-
-}
-
-auth.CheckLogin = function(){
+export function login (username, password){
 
 }
 
-auth.activate = function(){
+export async function getPublicKey (){
+    try {
+
+        let key = await SecureStore.getItemAsync('Public_Key');
+        if ( key ) return key;
+        
+        key = await fetch(`${AuthServerHost}/v1/public_key`, {
+            method: 'GET'
+        });
+        key = await key.text()
+        await SecureStore.setItemAsync('Public_Key', key);
+        return key;
+        
+    } catch (error) {
+        console.log(error)
+        return null;
+    }
 
 }
 
-auth.doFullCheck = function (){
+export function CheckLogin (){
 
 }
 
-auth.doOnBootCheck = function(){
+export function activate (){
 
 }
 
+export function doFullCheck  (){
 
-module.exports = auth;
+}
+
+export function doOnBootCheck (){
+
+}
