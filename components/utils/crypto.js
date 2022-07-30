@@ -1,16 +1,24 @@
+import { Crypt, RSA } from 'hybrid-crypto-js';
+var Buffer = require("@craftzdog/react-native-buffer").Buffer;
 
+var crypto = new Crypt({
+  aesStandard: 'AES-CBC',
+  rsaStandard: 'RSA-OAEP',
+});
 
-
-export default function crypt(key, buf, encrypt=true){
-  const max = encrypt ? 86 : 128
-  const length = buf.byteLength
-  let cursor = 0
-  const bufs = []
-  while (length - cursor > 0) {
-    let size = length - cursor
-    if (encrypt) bufs.push(crypto.privateEncrypt(key, buf.slice(cursor, size > max? cursor + max: length)))
-    else bufs.push(crypto.publicDecrypt(key, buf.slice(cursor, size > max? cursor + max: length)))
-    cursor = cursor + max
-  }
-  return Buffer.concat(bufs)
+export default async function crypt(key, message, encrypt=true){
+  try {
+    let result;
+    if(encrypt){
+        result = crypto.encrypt(key, message);
+        result = Buffer.from(result).toString('hex');
+    }else{
+        result = Buffer.from(message, 'hex').toString('utf8');
+        result = crypto.decrypt(key, result);
+        result = result.message;
+    }
+    return result;    
+} catch (error) {
+    console.log(error)   
+}
 }
