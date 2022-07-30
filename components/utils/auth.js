@@ -12,7 +12,10 @@ export async function login (username, password){
             body: JSON.stringify(body)
         })
         resp = await resp.json();
-        if (resp.status == 0) return alert(resp.message);
+        if (resp.status == 0) {
+            SecureStore.setItemAsync('user', JSON.stringify(resp.user_data));    
+            return alert(resp.message)
+        }
         
         return alert(resp.message)
     } catch (error) {
@@ -41,7 +44,10 @@ export async function getPublicKey (){
 
 }
 
-export function CheckLogin (){
+export async function CheckLogin (){
+    const logged_in  = await SecureStore.getItemAsync("user");
+    if (logged_in) return true
+    else return false
 
 }
 
