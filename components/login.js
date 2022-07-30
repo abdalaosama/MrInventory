@@ -18,7 +18,7 @@ export default function LoginScreen ( props ){
             // check time for choice of full check or just offline check
             // change to activation loading screen
             // do check
-            // is active
+            // active ?
                 // go to store choice screen
             // try to activate 
             // succeed ?
