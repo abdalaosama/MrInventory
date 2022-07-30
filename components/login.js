@@ -3,6 +3,8 @@ import { View, Image, StyleSheet, ScrollView} from "react-native";
 import TextField from "./shared/textField";
 import CheckBoxE from './shared/CheckBox';
 import ActionButton from "./shared/actionButton";
+import * as auth from "./utils/auth";
+
 export default function LoginScreen ( props ){
 
     const [checkBoxValue, setCheckBoxValue] = react.useState(false);
@@ -11,8 +13,17 @@ export default function LoginScreen ( props ){
     
     react.useEffect(() => {
         (async () => {
-
-
+            // check if you are logged in
+                // log in screen
+            // check time for choice of full check or just offline check
+            // change to activation loading screen
+            // do check
+            // is active
+                // go to store choice screen
+            // try to activate 
+            // succeed ?
+                // jump back to do check
+            // show app inactive screen
         })();
         return () => {
 
@@ -21,7 +32,7 @@ export default function LoginScreen ( props ){
     }, [])
 
     function LoginPress(e) {
-
+        auth.login(usernameValue, passwordValue);
     }
     return (
     <ScrollView style={{flex:1, backgroundColor:"white"}}>
