@@ -24,6 +24,22 @@ export async function login (username, password){
     
 }
 
+export async function logut(){
+    try {
+        let resp = await fetch(`${AuthServerHost}/v1/logout`,{ method:"GET" })
+        resp = await resp.json();
+        if (resp.status == 0) {
+            SecureStore.setItemAsync('user', "");
+            return alert(resp.message)
+        }
+        
+        return alert(resp.message)
+    } catch (error) {
+        console.log(error);
+    }
+ 
+}
+
 export async function getPublicKey (){
     try {
 
@@ -48,7 +64,6 @@ export async function CheckLogin (){
     const logged_in  = await SecureStore.getItemAsync("user");
     if (logged_in) return true
     else return false
-
 }
 
 export function activate (){
