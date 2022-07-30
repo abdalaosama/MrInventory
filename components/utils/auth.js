@@ -3,8 +3,22 @@ import * as SecureStore from 'expo-secure-store';
 
 const { AuthServerHost } = defaultAppSettings;
 
-export function login (username, password){
-
+export async function login (username, password){
+    try {
+        const body = {"username":username,"password":password};
+        let resp = await fetch(`${AuthServerHost}/v1/login`,{
+            method:"POST",
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body)
+        })
+        resp = await resp.json();
+        if (resp.status == 0) return alert(resp.message);
+        
+        return alert(resp.message)
+    } catch (error) {
+        console.log(error);
+    }
+    
 }
 
 export async function getPublicKey (){
