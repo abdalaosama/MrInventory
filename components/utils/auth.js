@@ -24,15 +24,12 @@ export async function login (username, password){
     
 }
 
-export async function logut(){
+export async function logout(){
     try {
         let resp = await fetch(`${AuthServerHost}/v1/logout`,{ method:"GET" })
         resp = await resp.json();
-        if (resp.status == 0) {
-            SecureStore.setItemAsync('user', "");
-            return alert(resp.message)
-        }
         
+        await SecureStore.setItemAsync('user', '');
         return alert(resp.message)
     } catch (error) {
         console.log(error);
@@ -62,18 +59,43 @@ export async function getPublicKey (){
 
 export async function CheckLogin (){
     const logged_in  = await SecureStore.getItemAsync("user");
+    console.log(logged_in);
     if (logged_in) return true
     else return false
 }
 
 export function activate (){
 
+    
 }
 
 export function doFullCheck  (){
-
+    try {
+        let result = false;   
+            // check if the license Parameters Exists
+            // decrypt 
+            // check expiration time
+            // check finger print
+            // check license server
+   
+       } catch (error) {
+           console.log(error)
+           return false;
+       }
+   
 }
 
 export function doOnBootCheck (){
+    try {
+     let result = false;   
+        // check if the license Parameters Exists
+        // decrypt 
+        // check expiration time
+        // check finger print
+    
 
+    } catch (error) {
+        console.log(error)
+        return false;
+    }
 }
