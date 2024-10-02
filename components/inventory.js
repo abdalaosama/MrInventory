@@ -9,7 +9,7 @@ import { Audio } from 'expo-av';
 import { tsvParse, tsvFormat } from 'd3-dsv';
 var RNFS = require('react-native-fs');
 
-import { SettingsContext } from '../App';
+import { SettingsContext } from "./SettingsContenxt";
 
 export default function InventoryScreen({ navigation }) {
   
@@ -66,7 +66,7 @@ export default function InventoryScreen({ navigation }) {
       }
     }catch(err){
       console.warn(err)
-      throw(new Error("Couldn't Ensure work Directory Exists"))
+      throw(new Error("Couldn't ensure work directory exists"))
     }
 
   }
@@ -102,32 +102,41 @@ export default function InventoryScreen({ navigation }) {
     
   }
   async function SaveFromInventoryToStoreFile (){
-    await EnsureWorkDirectoryExists()
-    const Filename = "store" + Settings.store + ".txt";
-    const FileContent = tsvFormat( items );
-    const FilePath = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/" + Filename;
-    RNFS.writeFile(FilePath, FileContent, 'utf8')
-    .then((success) => {
-      alert("Saved Successfully  :) ")
-        console.log(`Saved Inventory Successfully to file: ${FilePath}`);
-      })
-      .catch((err) => {
-        console.warn(err);
-        alert("Error saving to file")
-      });
+    try{
+      await EnsureWorkDirectoryExists()
+      const Filename = "store" + Settings.store + ".txt";
+      const FileContent = tsvFormat( items );
+      const FilePath = RNFS.ExternalStorageDirectoryPath + Settings.ExportFilesPath + "/" + Filename;
+      RNFS.writeFile(FilePath, FileContent, 'utf8')
+      .then((success) => {
+        alert("inventory saved successfully")
+          console.log(`Saved Inventory Successfully to file: ${FilePath}`);
+        })
+        .catch((err) => {
+          console.warn(err);
+          alert("Error saving to file")
+        });
+    } catch(err){
+      console.warn(err)
+      alert("Error saving to file")
+    } 
   }
   async function playSound() {
     console.log('Playing Sound');
     await sound.replayAsync(); 
   }
   function handleBarCodeScanned({ type, data }) {
-    console.log("Barcode Scanned: " + data + " Type: " + type)
-    setScanned(true)
-    setitemCode(data)
-    addToInventory(data, parseInt(Qty))
-    setTimeout(() => {
-      setScanned(false)
-    }, Settings.ScanCoolDown)
+    try{
+      console.log("Barcode Scanned: " + data + " Type: " + type)
+      setScanned(true)
+      setitemCode(data)
+      addToInventory(data, parseInt(Qty))
+      setTimeout(() => {
+        setScanned(false)
+      }, Settings.ScanCoolDown)
+    }catch(err){
+      console.warn(err)
+    }
   };
   function addToInventory(lItemCode, lqty ){
     console.log("Attempting to add Items: " + lItemCode + " Qty: " + lqty)

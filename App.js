@@ -5,24 +5,16 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 import InventoryScreen from './components/inventory';
 import SettingsScreen from './components/settings';
-import defaultAppSettings from './components/defaults';
 import StoresScreen from './components/stores';
 import LoginScreen from './components/login';
 
-const Drawer = createDrawerNavigator();
-export const SettingsContext = React.createContext(defaultAppSettings);
+import { SettingsContextProvider } from './components/SettingsContenxt';
 
-const changeSetting = (state, action) => {
-  let NewSettings = { ...state};
-  NewSettings[action.key] = action.value;
-  // console.log(state)
-  return NewSettings;
-}
+const Drawer = createDrawerNavigator();
 
 
 export default function App() {
 
-  const [Settings, changeSettings] = React.useReducer(changeSetting, defaultAppSettings)
   useEffect(() => {
     // run on the start of the application
 
@@ -32,16 +24,16 @@ export default function App() {
   }, [])
 
   return (
-    <SettingsContext.Provider value={{Settings: Settings, changeSettings: changeSettings}}>
+    <SettingsContextProvider>
       <NavigationContainer>
-        <Drawer.Navigator initialRouteName="login" screenOptions={{headerShown: false}}>
+        <Drawer.Navigator initialRouteName="stores" screenOptions={{headerShown: false}}>
+          <Drawer.Screen name="stores" component={StoresScreen} />
           <Drawer.Screen name="inventory" component={InventoryScreen} options={{ unmountOnBlur:true}} />
           <Drawer.Screen name="settings" component={SettingsScreen} />
-          <Drawer.Screen name="login" component={LoginScreen} options={{ swipeEnabled: false}} />
-          <Drawer.Screen name="stores" component={StoresScreen} />
+          {/* <Drawer.Screen name="login" component={LoginScreen} options={{ swipeEnabled: false}} /> */}
         </Drawer.Navigator>
       </NavigationContainer>
-    </SettingsContext.Provider>
+    </SettingsContextProvider>
   );
 }
 

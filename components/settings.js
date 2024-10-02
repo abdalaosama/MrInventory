@@ -1,6 +1,6 @@
 import react from "react";
 import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native"
-import { SettingsContext } from "../App";
+import { SettingsContext } from "./SettingsContenxt";
 import CheckBoxE from "./shared/CheckBox";
 import FileSelector from "./shared/fileSelector"
 import Seprator from "./shared/seprator";

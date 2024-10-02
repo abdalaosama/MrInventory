@@ -1,6 +1,6 @@
 import react from "react";
 import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
-import { SettingsContext } from '../App';
+import { SettingsContext } from './SettingsContenxt';
 
 export default function StoresScreen ( props ){
     const {Settings, changeSettings}  = react.useContext(SettingsContext);

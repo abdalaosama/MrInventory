@@ -8,6 +8,11 @@
     ],
     "android": {
       "package": "com.truetech.inventory"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8d5e2939-c90d-4609-b27c-8d9f28c593c9"
+      }
     }
   }
 }
